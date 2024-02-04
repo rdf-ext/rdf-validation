@@ -1,0 +1,6 @@
+import './term/DatatypeValidation.test.js'
+import './term/IntegerValidation.test.js'
+import './term/InValidation.test.js'
+import './term/PatternValidation.test.js'
+import './term/TermTypeValidation.test.js'
+import './term/XsdValidation.test.js'
