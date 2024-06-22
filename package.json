@@ -31,7 +31,7 @@
     "@rdfjs/data-model": "^2.0.1",
     "@rdfjs/namespace": "^2.0.0",
     "@rdfjs/term-map": "^2.0.0",
-    "@rdfjs/to-ntriples": "^2.0.0"
+    "@rdfjs/to-ntriples": "^3.0.1"
   },
   "devDependencies": {
     "c8": "^10.1.2",
