@@ -1,6 +1,6 @@
 {
   "name": "rdf-validation",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Validate RDF/JS objects",
   "type": "module",
   "main": "index.js",
