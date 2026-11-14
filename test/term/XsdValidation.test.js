@@ -1,4 +1,6 @@
-import { describe } from 'mocha'
+import { strictEqual } from 'node:assert'
+import rdf from '@rdfjs/data-model'
+import { describe, it } from 'mocha'
 import XsdValidation from '../../lib/term/XsdValidation.js'
 import generate from '../support/generate.js'
 import * as ns from '../support/namespaces.js'
@@ -360,4 +362,49 @@ describe('XsdValidation', () => {
   const validation = new XsdValidation()
 
   runTestCases({ testCases, validation })
+
+  describe('large values', () => {
+    const hexBinary = 'aB'.repeat(8 * 1024 * 1024)
+    const twoByteString = '\u0436'.repeat(16 * 1024 * 1024)
+    const astralString = '\ud83d\ude00'.repeat(8 * 1024 * 1024)
+
+    function assertValidation (value, datatype, expected) {
+      const term = rdf.literal(value, datatype)
+
+      strictEqual(validation.validate(term).conforms, expected)
+      strictEqual(validation.validateSimple(term), expected)
+    }
+
+    it('validates a hexBinary term with 16,777,216 hex digits as valid', () => {
+      assertValidation(hexBinary, ns.xsd.hexBinary, true)
+    })
+
+    it('validates a hexBinary term with 16,777,217 hex digits as invalid', () => {
+      assertValidation(`${hexBinary}a`, ns.xsd.hexBinary, false)
+    })
+
+    it('validates a hexBinary term with 16,777,216 characters ending in a non-hex digit as invalid', () => {
+      assertValidation(`${hexBinary.slice(0, -1)}g`, ns.xsd.hexBinary, false)
+    })
+
+    it('validates a string term with 16,777,216 characters above U+00FF as valid', () => {
+      assertValidation(twoByteString, ns.xsd.string, true)
+    })
+
+    it('validates a string term with 8,388,608 characters above U+FFFF as valid', () => {
+      assertValidation(astralString, ns.xsd.string, true)
+    })
+
+    it('validates a string term with 16,777,216 characters above U+00FF and a trailing lone surrogate as invalid', () => {
+      assertValidation(`${twoByteString}\ud800`, ns.xsd.string, false)
+    })
+
+    it('validates a string term with a leading lone surrogate and 16,777,216 characters above U+00FF as invalid', () => {
+      assertValidation(`\udc00${twoByteString}`, ns.xsd.string, false)
+    })
+
+    it('validates an anyURI term with 16,777,216 characters above U+00FF as valid', () => {
+      assertValidation(twoByteString, ns.xsd.anyURI, true)
+    })
+  })
 })
